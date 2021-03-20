@@ -4,15 +4,15 @@ import re
 
 class MovieDetail():
 
-    def __init__(self, herf):
-        self.herf = herf
+    def __init__(self, href):
+        self.href = href
         self.total_html = ""
         self.info_html = ""
         self.sub_info_html = ""
 
     # 取得html
     def get_html(self):
-        self.total_html = requests.get(self.herf).text
+        self.total_html = requests.get(self.href).text
 
         info_pattern = '<div class=\"movie_intro_info_r\">[\s\S]*?<dl class=\"evaluatebox\">'
         self.info_html = re.findall(info_pattern, self.total_html)[0]
@@ -22,7 +22,7 @@ class MovieDetail():
     # 電影ID (yahoo)
     def id(self):
         try:
-            return int(self.herf.split("-")[-1])
+            return int(self.href.split("-")[-1])
         except:
             return None
 

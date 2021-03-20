@@ -40,15 +40,15 @@ def main():
 def perpage(n):
     yahooMovieList = yahoo_movie_list.YahooMovieList(
         'https://movies.yahoo.com.tw/movie_intheaters.html?page=' + str(n))
-    movie_herfs = yahooMovieList.movie_herfs()
+    movie_hrefs = yahooMovieList.movie_hrefs()
     mongodb = mongodb_for_data.MongoDb()
     mongodb.connection()
     mongodb.find_max_movie_id()
 
-    for herf in movie_herfs:
+    for href in movie_hrefs:
         mongo_d = {}
 
-        movieDetail = movie_detail.MovieDetail(herf)
+        movieDetail = movie_detail.MovieDetail(href)
         movieDetail.get_html()
         mongo_d['id'] = movieDetail.id()
         mongo_d['title'] = movieDetail.title()
