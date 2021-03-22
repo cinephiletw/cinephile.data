@@ -14,6 +14,8 @@ class MovieDetail():
         self.title_area_html = ""
         self.info_area_html = ""
         self.info_area_list = []
+        self.content_html = ""
+        self.img_html = ""
 
     # 取得html
     def get_html(self):
@@ -29,6 +31,10 @@ class MovieDetail():
         info_area_list_pattern = '<tr>[\s\S]*?</tr>'
         self.info_area_list = re.findall(info_area_list_pattern,
                                          self.info_area_html)
+        content_pattern = '<div class=\"bbsArticle\">[\s\S]*?</div>'
+        self.content_html = re.findall(content_pattern, self.total_html)[0]
+        img_pattern = '<div id=\"photoBox\" class=\"moviePicture\"[\s\S]*?<footer'
+        self.img_html = re.findall(img_pattern, self.total_html)[0]
 
     # 電影ID viewshow
     def id(self):
@@ -103,8 +109,8 @@ class MovieDetail():
     def cast(self):
         try:
             cast_str = self.info_area_list[1].split('<td><p>')[1].split(
-                '</p></td>')[0].replace(' ', '').replace('<br>',
-                                                         '').replace('\"', '')
+                '</p></td>')[0].replace(' ', '').replace('<br>', '').replace(
+                    '\"', '').replace('(聲優)', '')
             cast_list = cast_str.split('、')
             for i in range(len(cast_list)):
                 cast_list[i] = self.lan_identify(cast_list[i])
@@ -120,5 +126,63 @@ class MovieDetail():
                 '<td>', '').replace('</td>', '').replace('/', '、')
             genre_list = genre_str.split('、')
             return genre_list
+        except:
+            return None
+
+    # 片長
+    def runtime(self):
+        try:
+            pattern = '<td>[\s\S]*?</td>'
+            runtime_str = re.findall(pattern,
+                                     self.info_area_list[3])[1].replace(
+                                         '<td>',
+                                         '').replace('</td>',
+                                                     '').replace('/', '、')
+            if '時' in runtime_str:
+                hr_str = runtime_str.strip().split('時')[0]
+                min_str = runtime_str.strip().split('時')[1].replace('分', '')
+                return int(hr_str) * 60 + int(min_str)
+            else:
+                min_str = runtime_str.replace('分', '')
+                return int(min_str)
+        except:
+            return None
+
+    # 海報
+    def poster(self):
+        try:
+            pattern = '<figure>[\s\S]*?</figure>'
+            poster_html = re.findall(pattern, self.info_html)[0]
+            poster_pre_path = poster_html.split('src=\"')[1].split('\"')[0]
+            poster_path = 'https://www.vscinemas.com.tw/vsweb' + poster_pre_path.replace(
+                '..', '')
+            return poster_path
+        except:
+            return None
+
+    # 內容
+    def content(self):
+        try:
+            return self.content_html.replace(' ', '').replace(
+                '<divclass="bbsArticle">',
+                '').replace('<p>',
+                            '').replace('</p>',
+                                        '').replace('<br/>',
+                                                    '').replace('</div>', '')
+        except:
+            return None
+
+    # 劇照
+    def img(self):
+        try:
+            pattern = '<img u=\"image\" src=\"..[\s\S]*?\" itemprop=\"thumbnail\">'
+            img_path_str_list = re.findall(pattern, self.img_html)
+            img_path_list = []
+            for path in img_path_str_list:
+                img_path_list.append(
+                    'https://www.vscinemas.com.tw/vsweb' +
+                    path.replace('<img u=\"image\" src=\"..', '').replace(
+                        '\" itemprop=\"thumbnail\">', ''))
+            return img_path_list
         except:
             return None

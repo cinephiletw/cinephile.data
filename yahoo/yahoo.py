@@ -1,8 +1,8 @@
-from yahoo import yahoo_movie_list
+from .yahoo_movie_list import yahoo_movie_list
 # methods:
 #     movie_herfs()
 
-from yahoo import movie_detail
+from .movie_detail import movie_detail
 # methods:
 #     get_html()
 #     id()
@@ -13,7 +13,7 @@ from yahoo import movie_detail
 #     poster()
 #     image()
 
-from yahoo import launch_detail
+from .launch_detail import launch_detail
 # methods:
 #     get_detail_list()
 #     release_date()
@@ -21,16 +21,16 @@ from yahoo import launch_detail
 #     company()
 #     imdb_rate()
 
-from yahoo import people
+from .people import people
 # methods:
 #     get_people_detail()
 #     director()
 #     cast()
 
-from mongoDAO import mongodb_for_data
+# from ./../mongoDAO import mongodb_for_data
 
 
-def main():
+def Yahoo():
     n = 1
     while (n != 9):
         perpage(n)
@@ -41,9 +41,9 @@ def perpage(n):
     yahooMovieList = yahoo_movie_list.YahooMovieList(
         'https://movies.yahoo.com.tw/movie_intheaters.html?page=' + str(n))
     movie_hrefs = yahooMovieList.movie_hrefs()
-    mongodb = mongodb_for_data.MongoDb()
-    mongodb.connection()
-    mongodb.find_max_movie_id()
+    #  mongodb = mongodb_for_data.MongoDb()
+    # mongodb.connection()
+    # mongodb.find_max_movie_id()
 
     for href in movie_hrefs:
         mongo_d = {}
@@ -69,9 +69,7 @@ def perpage(n):
         peo.get_people_detail()
         mongo_d['director'] = peo.director()
         mongo_d['cast'] = peo.cast()
+        print(mongo_d)
+        break
 
-        mongodb.insert(mongo_d)
-
-
-if __name__ == '__main__':
-    main()
+        # mongodb.insert(mongo_d)

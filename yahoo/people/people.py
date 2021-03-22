@@ -3,7 +3,7 @@ import re
 import time
 import datetime
 import pytz
-from . import movie_detail
+# from . import movie_detail
 
 
 class People():

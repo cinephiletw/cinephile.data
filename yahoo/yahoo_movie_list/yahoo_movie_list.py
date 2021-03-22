@@ -2,7 +2,7 @@ import requests
 import re
 
 
-class yahooMovieList():
+class YahooMovieList():
 
     def __init__(self, href):
         self.href = href
