@@ -22,11 +22,11 @@ def perpage(n):
     vieshowMovieList = vieshow_movie_list.VieshowMovieList(
         'https://www.vscinemas.com.tw/vsweb/film/index.aspx?p=' + str(n))
     movie_hrefs = vieshowMovieList.movie_hrefs()
+    movie_data = []
     for href in movie_hrefs:
         mongo_d = {}
         movieDetail = movie_detail.MovieDetail(href)
         movieDetail.get_html()
-        mongo_d['id'] = movieDetail.id()
         mongo_d['title'] = movieDetail.title()
         mongo_d['origin_title'] = movieDetail.origin_title()
         mongo_d['release_date'] = movieDetail.release_date()
@@ -37,12 +37,22 @@ def perpage(n):
         mongo_d['poster_path'] = movieDetail.poster()
         mongo_d['content'] = movieDetail.content()
         mongo_d['image_path'] = movieDetail.img()
-        mongo_d['movie_source'] = [{
-            'vieshow': 'https://www.vscinemas.com.tw/vsweb/film/' + href
+        mongo_d['source'] = [{
+            'web_id': movieDetail.id(),
+            'web_name': 'vieshow',
+            'web_url': 'https://www.vscinemas.com.tw/vsweb/film/' + href
         }]
-        print(mongo_d)
-        break
+        movie_data.append(mongo_d)
+    return movie_data
 
 
 def Vieshow():
-    perpage(1)
+    index = 1
+    movies = []
+    while (True):
+        try:
+            movies.extend(perpage(index))
+            index += 1
+        except:
+            break
+    return movies
