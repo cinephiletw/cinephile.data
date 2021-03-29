@@ -31,13 +31,25 @@ class MongoDb():
 
 # 如果doc 存在就更新doc，但如果不存在，插入一筆新的doc並且增加primary key: max_id
 
+    def find(self, date, title):
+        cursor = self.client['movies']['info'].find({
+            "release_date": date,
+            "origin_title": title
+        })
+        return cursor
+
     def insert(self, doc):
-        self.max_id += 1
-        self.client['movies']['info'].update(doc, {
-            '$set': doc,
-            '$setOnInsert': {
-                'movie_id': self.max_id
-            }
-        },
-                                             upsert=True)
+        try:
+            movie_id = doc['movie_id']
+            self.client['movies']['info'].update({'movie_id': movie_id},
+                                                 {'$set': doc})
+        except:
+            self.max_id += 1
+            self.client['movies']['info'].update(doc, {
+                '$set': doc,
+                '$setOnInsert': {
+                    'movie_id': self.max_id
+                }
+            },
+                                                 upsert=True)
         return

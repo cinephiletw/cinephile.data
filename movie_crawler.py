@@ -1,6 +1,8 @@
 from vieshow import vieshow
 from universal import universal
 import pickle
+import pprint
+from mongoDAO import mongodb_for_data
 
 # 先各自用release_date 排序
 # if release_data 一樣，origin_title 不重複，直接取出
@@ -13,21 +15,41 @@ import pickle
 
 
 def main():
-    #vieshow_movie_data = vieshow.Vieshow()
-    #  universal_movie_data = universal.perpage()
-    #  with open('./test_data/vieshow.pk', 'wb') as f:
-    #      pickle.dump(vieshow_movie_data, f)
-    #  with open('./test_data/universal_movie_data.pk', 'wb') as f:
-    #      pickle.dump(universal_movie_data, f)
+    # vieshow_movie_data = vieshow.Vieshow()
+    # universal_movie_data = universal.perpage()
+    # with open('./test_data/vieshow_coming.pk', 'wb') as f:
+    #     pickle.dump(vieshow_movie_data, f)
+    # with open('./test_data/universal_movie_data.pk', 'wb') as f:
+    #     pickle.dump(universal_movie_data, f)
+    # return
 
-    with open('./test_data/vieshow.pk', 'rb') as f:
-        vieshow_data = pickle.load(f)
-    with open('./test_data/universal_movie_data.pk', 'rb') as f:
-        universal_data = pickle.load(f)
+    # with open('./test_data/vieshow_coming.pk', 'rb') as f:
+    #    vieshow_data = pickle.load(f)
+    # with open('./test_data/universal_movie_data.pk', 'rb') as f:
+    #    universal_data = pickle.load(f)
 
+    #movie_list = compare_two_list(vieshow_data, universal_data)
+    mongo = mongodb_for_data.MongoDb()
+    mongo.connection()
+    mongo.find_max_movie_id()
+    for movie in vieshow_data:
+        exist_in_mongo = []
+        title_str = ''.join(e for e in movie['origin_title'] if e.isalnum())
+        title_str = title_str.lower()
+        for doc in mongo.find(movie['release_date'], title_str):
+            exist_in_mongo.append(compare_element(doc, movie))
+        if len(exist_in_mongo) != 0:
+            #        mongo.insert(exist_in_mongo[0])
+            print('exist:\n', exist_in_mongo[0])
+        else:
+            #        mongo.insert(movie)
+            print('not exist:\n', movie)
+
+
+def compare_two_list(list1, list2):
     # 將電影資料合併
-    vieshow_data.extend(universal_data)
-    total_data = vieshow_data
+    list1.extend(list2)
+    total_data = list1
 
     # 依照上映時間排序
     sorted_data = list_sorter(total_data)
@@ -49,8 +71,7 @@ def main():
     for movie_list in group_by_date:
         final_movie_list.extend(which_movie(movie_list))
 
-    for movie in final_movie_list:
-        print(movie)
+    return final_movie_list
 
 
 def list_sorter(row_list):
@@ -86,12 +107,10 @@ def compare_element(dict1, dict2):
             print(dict1[key])
         except KeyError:
             dict1[key] = None
-            print('add None to' + key + 'in dict1')
         try:
             print(dict2[key])
         except KeyError:
             dict2[key] = None
-            print('add None to' + key + 'in dict2')
         if dict1[key] == None and dict2[key] != None:
             result_dict[key] = dict2[key]
         elif dict1[key] != None and dict2[key] == None:
@@ -100,6 +119,8 @@ def compare_element(dict1, dict2):
             result_dict[key] = None
         else:
             result_dict[key] = which_value(key, dict1, dict2)
+
+    print('-' * 50)
     return result_dict
 
 
@@ -113,7 +134,14 @@ def which_value(key, dict1, dict2):
         if key == 'content':
             return dict1[key] + dict2[key]
         elif key == 'source':
-            return dict1[key].extend(dict2[key])
+            dict1[key].extend(dict2[key])
+            return dict1[key]
+        elif key == 'image_path':
+            dict1[key].extend(dict2[key])
+            return dict1[key]
+        elif key == 'poster_path':
+            dict1[key].extend(dict2[key])
+            return dict1[key]
         elif key == 'cast':
             if len(dict1[key]) >= len(dict2[key]):
                 return dict1[key]

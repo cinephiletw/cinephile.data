@@ -20,7 +20,7 @@ from .movie_detail import movie_detail
 
 def perpage(n):
     vieshowMovieList = vieshow_movie_list.VieshowMovieList(
-        'https://www.vscinemas.com.tw/vsweb/film/index.aspx?p=' + str(n))
+        'https://www.vscinemas.com.tw/vsweb/film/coming.aspx?p=' + str(n))
     movie_hrefs = vieshowMovieList.movie_hrefs()
     movie_data = []
     for href in movie_hrefs:
