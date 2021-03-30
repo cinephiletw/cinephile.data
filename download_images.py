@@ -16,24 +16,36 @@ def main():
         "@movies.9gsbi.mongodb.net/<dbname>?retryWrites=true&w=majority")
 
     mongo_collection = client['movies']['info']
-    data = mongo_collection.find({}, {
-        "id": 1,
+    data = mongo_collection.find({"movie_id": {
+        "$gt": 80
+    }}, {
+        "movie_id": 1,
         "image_path": 1,
         "poster_path": 1
     })
     data_img = []
     for d in data:
-        for image in d['image_path']:
-            image_img = requests.get(image, timeout=10).content
+        print(d['movie_id'])
+        try:
+            index = 0
+            for image in d['image_path']:
+                image_img = requests.get(image, timeout=10).content
+                with open(
+                        './../api/public/images/backdrop/image_path_' +
+                        str(d['movie_id']) + '/' + str(d['movie_id']) + '_' +
+                        str(index) + '.jpg', 'wb') as f:
+                    f.write(image_img)
+                index += 1
+        except:
+            print('fail')
+        try:
+            poster_img = requests.get(d["poster_path"], timeout=10).content
             with open(
-                    './../api/images/' + str(d['id']) + '/' + str(d['id']) +
-                    '.jpg', 'wb') as f:
-                f.write(backdrop_img)
-        poster_img = requests.get(d["poster_path"], timeout=10).content
-        with open('./../api/images/poster_path_' + str(d['id']) + '.jpg',
-                  'wb') as f:
-            f.write(poster_img)
-        break
+                    './../api/public/images/poster/poster_path_' +
+                    str(d['movie_id']) + '.jpg', 'wb') as f:
+                f.write(poster_img)
+        except:
+            print('fail')
 
 
 main()
