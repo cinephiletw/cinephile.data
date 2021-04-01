@@ -17,7 +17,7 @@ def main():
 
     mongo_collection = client['movies']['info']
     data = mongo_collection.find({"movie_id": {
-        "$gt": 80
+        "$gt": 79
     }}, {
         "movie_id": 1,
         "image_path": 1,
@@ -26,10 +26,15 @@ def main():
     data_img = []
     for d in data:
         print(d['movie_id'])
+        break
         try:
             index = 0
             for image in d['image_path']:
                 image_img = requests.get(image, timeout=10).content
+                folder = './../api/public/images/backdrop/image_path_' + str(
+                    d['movie_id'])
+                if not os.path.exists(folder):
+                    os.mkdir(folder)
                 with open(
                         './../api/public/images/backdrop/image_path_' +
                         str(d['movie_id']) + '/' + str(d['movie_id']) + '_' +
@@ -37,15 +42,15 @@ def main():
                     f.write(image_img)
                 index += 1
         except:
-            print('fail')
-        try:
-            poster_img = requests.get(d["poster_path"], timeout=10).content
-            with open(
-                    './../api/public/images/poster/poster_path_' +
-                    str(d['movie_id']) + '.jpg', 'wb') as f:
-                f.write(poster_img)
-        except:
-            print('fail')
+            print(str(d['movie_id']) + 'do not have image')
+    #  try:
+    #      poster_img = requests.get(d["poster_path"], timeout=10).content
+    #      with open(
+    #              './../api/public/images/poster/poster_path_' +
+    #              str(d['movie_id']) + '.jpg', 'wb') as f:
+    #          f.write(poster_img)
+    #  except:
+    #      print('fail')
 
 
 main()
